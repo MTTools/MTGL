@@ -4,6 +4,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	uint16_t width;
 	uint16_t height;
@@ -21,3 +25,7 @@ typedef struct {
 } Font;
 
 void MTGL_drawString(const char *ch, int pos_x, int pos_y, const Font *font);
+
+#ifdef __cplusplus
+}
+#endif

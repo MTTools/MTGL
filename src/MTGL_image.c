@@ -1,6 +1,10 @@
 #include "MTGL_image.h"
 #include "MTGL_core.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // compression methods
 #define IMAGE_COMPRESSION_NONE		0 // (uncompressed image_data)
 #define IMAGE_COMPRESSION_LZ77		1 // LZ77~ compression
@@ -55,3 +59,7 @@ void MTGL_drawImage(int pos_x, int pos_y, const Image *image) {
 
     MTGL_drawImageBPP(pos_x, pos_y, image->width, image->height, image_data, image->bits_per_pixel);
 }
+
+#ifdef __cplusplus
+}
+#endif

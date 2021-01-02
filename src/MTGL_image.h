@@ -2,6 +2,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     uint16_t width, height;
     uint8_t *image_data;
@@ -10,3 +14,7 @@ typedef struct {
 } Image;
 
 void MTGL_drawImage(int pos_x, int pos_y, const Image *image);
+
+#ifdef __cplusplus
+}
+#endif

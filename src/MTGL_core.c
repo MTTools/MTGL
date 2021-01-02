@@ -4,6 +4,10 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     void (*flushBuffer)(void);
     void (*drawPixel)(int x, int y, uint8_t color);
@@ -31,3 +35,7 @@ void MTGL_drawPixel(int x, int y, uint8_t color) {
         mtgl.drawPixel(x, y, color);
     }
 }
+
+#ifdef __cplusplus
+}
+#endif

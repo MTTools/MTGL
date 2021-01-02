@@ -3,6 +3,10 @@
 #include <string.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern void MTGL_drawImageBPP(int pos_x, int pos_y, int width, int height, const uint8_t *image_data, uint8_t bpp);
 
 // ------------------------------ basic private font functions ------------------------------
@@ -111,3 +115,6 @@ void MTGL_drawString(const char *ch, int pos_x, int pos_y, const Font *font) {
     }
 }
 
+#ifdef __cplusplus
+}
+#endif
