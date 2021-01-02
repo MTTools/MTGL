@@ -12,15 +12,21 @@ extern "C" {
 // used compression method
 #define IMAGE_COMPRESSION_METHOD	IMAGE_COMPRESSION_LZ77
 
-static int _getMask(BitsPerPixel bpp) {
+// image decompression buffer size
+#define DECOMPRESSION_BUFFER_SIZE   (180 * 180)
+
+// image decompression buffer
+static uint8_t decompression_buffer[DECOMPRESSION_BUFFER_SIZE];
+
+static int _getMask(uint8_t bpp) {
     return ((1 << bpp) - 1) << (8 - bpp);
 }
 
-static uint8_t _getPixelColor(uint8_t input, int bit_nr, BitsPerPixel bpp) {
+static uint8_t _getPixelColor(uint8_t input, int bit_nr, uint8_t bpp) {
     const int Mask = _getMask(bpp) >> bit_nr;
     input &= Mask;
     input = input >> (8 - bit_nr - bpp);
-    return input * ((1 << SCREEN_BPP) - 1) / ((1 << bpp) - 1);
+    return input; // * ((1 << SCREEN_BPP) - 1) / ((1 << bpp) - 1);
 }
 
 void MTGL_drawImageBPP(int pos_x, int pos_y, int width, int height, const uint8_t *image_data, uint8_t bpp) {

@@ -8,31 +8,23 @@
 extern "C" {
 #endif
 
-typedef struct {
-    void (*flushBuffer)(void);
-    void (*drawPixel)(int x, int y, uint8_t color);
-} MTGL;
-
-static MTGL mtgl = {
-    flushBufferFunction = NULL,
-    drawPixelFunction = NULL,
-};
+static void (*_flushBuffer)(void) = NULL;
+static void (*_drawPixel)(int x, int y, uint8_t color) = NULL;
 
 void MTGL_attatchHAL(void (*flushBufferFunction)(void),
-        void (*drawPixelFunction)(int x, int y, uint8_t color),
-        uint8_t screen_bpp) {
-    mtgl.flushBuffer = flushBufferFunction;
-    mtgl.drawPixel = drawPixelFunction;
+        void (*drawPixelFunction)(int x, int y, uint8_t color)) {
+    _flushBuffer = flushBufferFunction;
+    _drawPixel = drawPixelFunction;
 }
 
 void MTGL_flushBuffer(void) {
-    if (mtgl.flushBuffer != NULL) {
-        mtgl.flushBuffer();
+    if (_flushBuffer != NULL) {
+        _flushBuffer();
     }
 }
 void MTGL_drawPixel(int x, int y, uint8_t color) {
-    if (mtgl.drawPixel != NULL) {
-        mtgl.drawPixel(x, y, color);
+    if (_drawPixel != NULL) {
+        _drawPixel(x, y, color);
     }
 }
 

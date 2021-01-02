@@ -24,7 +24,7 @@ typedef struct {
 	Character **character_table;
 } Font;
 
-void MTGL_drawString(const char *ch, int pos_x, int pos_y, const Font *font);
+void MTGL_drawString(const char *str, int pos_x, int pos_y, const Font *font);
 
 #ifdef __cplusplus
 }
