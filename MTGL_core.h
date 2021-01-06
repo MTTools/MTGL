@@ -6,10 +6,14 @@
 extern "C" {
 #endif
 
-void MTGL_attatchHAL(int screen_width, int screen_height,
-        void (*flushBufferFunction)(void),
-        void (*drawPixelFunction)(int x, int y, uint8_t color),
-        void (*fillFunction)(uint8_t color));
+typedef struct {
+    uint32_t screen_width, screen_height;
+    uint8_t screen_bpp;
+    uint8_t *screen_buffer;
+    void (*flushBufferFunction)(void);
+} MTGLInitStruct;
+
+void MTGL_attatchHAL(MTGLInitStruct *init_struct);
 
 void MTGL_flushBuffer(void);
 void MTGL_drawPixel(int x, int y, uint8_t color);
