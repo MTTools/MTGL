@@ -16,7 +16,9 @@ extern "C" {
 #define IMAGE_DECOMPRESSION_BUFFER_SIZE   (180 * 180)
 
 // image decompression buffer
+#if IMAGE_COMPRESSION_METHOD != IMAGE_COMPRESSION_NONE
 static uint8_t decompression_buffer[IMAGE_DECOMPRESSION_BUFFER_SIZE];
+#endif
 
 static int _getMask(uint8_t bpp) {
     return ((1 << bpp) - 1) << (8 - bpp);

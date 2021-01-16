@@ -12,13 +12,15 @@ extern "C" {
 #define FONT_COMPRESSION_LZ77      1 // LZ77~ compression
 
 // used compression method
-#define FONT_COMPRESSION_METHOD    FONT_COMPRESSION_NONE
+#define FONT_COMPRESSION_METHOD    FONT_COMPRESSION_LZ77
 
 // image decompression buffer size
 #define FONT_DECOMPRESSION_BUFFER_SIZE   (40 * 40)
 
 // image decompression buffer
+#if FONT_COMPRESSION_METHOD != FONT_COMPRESSION_NONE
 static uint8_t decompression_buffer[FONT_DECOMPRESSION_BUFFER_SIZE];
+#endif
 
 extern void MTGL_drawImageBPP(int pos_x, int pos_y, int width, int height, const uint8_t *image_data, uint8_t bpp);
 
