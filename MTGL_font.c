@@ -94,12 +94,12 @@ static uint16_t Font_getCharWidth(Font *font, char *utf8_char, uint8_t *out_byte
 
 // ------------------------------ public graphic font functions ------------------------------
 
-void MTGL_drawString(const char *str, int pos_x, int pos_y, const Font *font) {
+void MTGL_drawString(const char *str, int pos_x, int pos_y, const Font *font, float line_spacing) {
     int curr_pos_x = pos_x;
     int curr_pos_y = pos_y;
     while (*str) {
         if (*str == '\n') {
-            curr_pos_y += font->font_size;
+            curr_pos_y += font->font_size * line_spacing;
             curr_pos_x = pos_x;
             str++;
         }
