@@ -15,6 +15,7 @@ typedef struct {
 	uint16_t height_offset;
 	uint32_t unicode;
 	uint8_t *data;
+	uint32_t data_length;
 } Character;
 
 typedef struct {
