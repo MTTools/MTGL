@@ -13,10 +13,10 @@ extern "C" {
 #define IMAGE_COMPRESSION_METHOD	IMAGE_COMPRESSION_LZ77
 
 // image decompression buffer size
-#define DECOMPRESSION_BUFFER_SIZE   (180 * 180)
+#define IMAGE_DECOMPRESSION_BUFFER_SIZE   (180 * 180)
 
 // image decompression buffer
-static uint8_t decompression_buffer[DECOMPRESSION_BUFFER_SIZE];
+static uint8_t decompression_buffer[IMAGE_DECOMPRESSION_BUFFER_SIZE];
 
 static int _getMask(uint8_t bpp) {
     return ((1 << bpp) - 1) << (8 - bpp);

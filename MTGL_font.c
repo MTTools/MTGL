@@ -7,6 +7,19 @@
 extern "C" {
 #endif
 
+// compression methods
+#define FONT_COMPRESSION_NONE      0 // (uncompressed image_data)
+#define FONT_COMPRESSION_LZ77      1 // LZ77~ compression
+
+// used compression method
+#define FONT_COMPRESSION_METHOD    FONT_COMPRESSION_NONE
+
+// image decompression buffer size
+#define FONT_DECOMPRESSION_BUFFER_SIZE   (40 * 40)
+
+// image decompression buffer
+static uint8_t decompression_buffer[FONT_DECOMPRESSION_BUFFER_SIZE];
+
 extern void MTGL_drawImageBPP(int pos_x, int pos_y, int width, int height, const uint8_t *image_data, uint8_t bpp);
 
 // ------------------------------ basic private font functions ------------------------------
@@ -76,7 +89,7 @@ static Character * _getCharacterFromArray(uint32_t unicode_char, Character **arr
     return NULL;
 }
 
-static Character * Font_getCharUTF8(Font *font, char *utf8_char, uint8_t *out_byte_count) {
+static Character * Font_getCharUTF8(const Font *font, const char *utf8_char, uint8_t *out_byte_count) {
     Utf8UnicodeChar ch = _charFromUtf8(utf8_char);
     if (out_byte_count != NULL) {
         *out_byte_count = ch.utf8_len;
@@ -84,7 +97,7 @@ static Character * Font_getCharUTF8(Font *font, char *utf8_char, uint8_t *out_by
     return _getCharacterFromArray(ch.unicode, font->character_table, font->character_count);
 }
 
-static uint16_t Font_getCharWidth(Font *font, char *utf8_char, uint8_t *out_byte_count) {
+static uint16_t Font_getCharWidth(const Font *font, const char *utf8_char, uint8_t *out_byte_count) {
     Character *character = Font_getCharUTF8(font, utf8_char, out_byte_count);
     if (character == NULL) {
         return 0;
@@ -93,6 +106,23 @@ static uint16_t Font_getCharWidth(Font *font, char *utf8_char, uint8_t *out_byte
 }
 
 // ------------------------------ public graphic font functions ------------------------------
+
+static void _drawCharacter(Character *character, int pos_x, int pos_y, uint8_t bpp) {
+    uint8_t *image_data = character->data;
+
+#if FONT_COMPRESSION_METHOD == FONT_COMPRESSION_NONE
+    // uncompressed
+#elif FONT_COMPRESSION_METHOD == FONT_COMPRESSION_LZ77
+    uint32_t size = lz77_decompress(image_data, character->data_length, decompression_buffer, sizeof(decompression_buffer));
+    if (size > sizeof(decompression_buffer)) {
+        // too small decompression buffer
+        return;
+    }
+    image_data = decompression_buffer;
+#endif
+
+    MTGL_drawImageBPP(pos_x, pos_y + character->height_offset, character->bytes_per_line * 8 / bpp, character->height, image_data, bpp);
+}
 
 void MTGL_drawString(const char *str, int pos_x, int pos_y, const Font *font, float line_spacing) {
     int curr_pos_x = pos_x;
@@ -107,7 +137,7 @@ void MTGL_drawString(const char *str, int pos_x, int pos_y, const Font *font, fl
             unsigned char char_len;
             Character *ch = Font_getCharUTF8(font, str, &char_len);
             if (ch != NULL) {
-                MTGL_drawImageBPP(curr_pos_x, curr_pos_y + ch->height_offset, ch->bytes_per_line * 8 / font->bits_per_pixel, ch->height, ch->data, font->bits_per_pixel);
+                _drawCharacter(ch, curr_pos_x, curr_pos_y, font->bits_per_pixel);
                 curr_pos_x += ch->width;
             }
             str += char_len;
