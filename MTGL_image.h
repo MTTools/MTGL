@@ -2,6 +2,16 @@
 
 #include <stdint.h>
 
+// compression methods
+#define IMAGE_COMPRESSION_NONE      0 // (uncompressed image_data)
+#define IMAGE_COMPRESSION_LZ77      1 // LZ77~ compression
+
+// used compression method
+#define IMAGE_COMPRESSION_METHOD    IMAGE_COMPRESSION_LZ77
+
+// image decompression buffer size
+#define IMAGE_DECOMPRESSION_BUFFER_SIZE   (180 * 180)
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -4,6 +4,16 @@
 
 #include <stdint.h>
 
+// compression methods
+#define FONT_COMPRESSION_NONE      0 // (uncompressed image_data)
+#define FONT_COMPRESSION_LZ77      1 // LZ77~ compression
+
+// used compression method
+#define FONT_COMPRESSION_METHOD    FONT_COMPRESSION_LZ77
+
+// image decompression buffer size
+#define FONT_DECOMPRESSION_BUFFER_SIZE   (40 * 40)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -26,6 +36,8 @@ typedef struct {
 } Font;
 
 void MTGL_drawString(const char *str, int pos_x, int pos_y, const Font *font, float line_spacing);
+
+MTGLSize Font_getStringSize(const char *str, const Font *font, float line_spacing);
 
 #ifdef __cplusplus
 }

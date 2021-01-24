@@ -1,19 +1,13 @@
 #include "MTGL_image.h"
 #include "MTGL_core.h"
 
+#if IMAGE_COMPRESSION_METHOD == IMAGE_COMPRESSION_LZ77
+#include "lz77.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// compression methods
-#define IMAGE_COMPRESSION_NONE		0 // (uncompressed image_data)
-#define IMAGE_COMPRESSION_LZ77		1 // LZ77~ compression
-
-// used compression method
-#define IMAGE_COMPRESSION_METHOD	IMAGE_COMPRESSION_LZ77
-
-// image decompression buffer size
-#define IMAGE_DECOMPRESSION_BUFFER_SIZE   (180 * 180)
 
 // image decompression buffer
 #if IMAGE_COMPRESSION_METHOD != IMAGE_COMPRESSION_NONE

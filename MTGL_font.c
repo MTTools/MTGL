@@ -3,19 +3,13 @@
 #include <string.h>
 #include <stddef.h>
 
+#if FONT_COMPRESSION_METHOD == FONT_COMPRESSION_LZ77
+#include "lz77.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// compression methods
-#define FONT_COMPRESSION_NONE      0 // (uncompressed image_data)
-#define FONT_COMPRESSION_LZ77      1 // LZ77~ compression
-
-// used compression method
-#define FONT_COMPRESSION_METHOD    FONT_COMPRESSION_LZ77
-
-// image decompression buffer size
-#define FONT_DECOMPRESSION_BUFFER_SIZE   (40 * 40)
 
 // image decompression buffer
 #if FONT_COMPRESSION_METHOD != FONT_COMPRESSION_NONE
@@ -99,12 +93,37 @@ static Character * Font_getCharUTF8(const Font *font, const char *utf8_char, uin
     return _getCharacterFromArray(ch.unicode, font->character_table, font->character_count);
 }
 
-static uint16_t Font_getCharWidth(const Font *font, const char *utf8_char, uint8_t *out_byte_count) {
-    Character *character = Font_getCharUTF8(font, utf8_char, out_byte_count);
-    if (character == NULL) {
-        return 0;
+MTGLSize Font_getStringSize(const char *str, const Font *font, float line_spacing) {
+    MTGLSize result = {
+            .width = 0,
+            .height = font->font_size * line_spacing
+    };
+    uint32_t current_width = 0;
+
+    while (*str != '\0') {
+        if (*str == '\n') {
+            // new line
+            if (current_width > result.width) {
+                result.width = current_width;
+            }
+            current_width = 0;
+            result.height += font->font_size * line_spacing;
+        }
+        else {
+            unsigned char char_len;
+            Character *ch = Font_getCharUTF8(font, str, &char_len);
+            if (ch != NULL) {
+                current_width += ch->width;
+
+            }
+            str += char_len;
+        }
     }
-    return character->width;
+    if (current_width > result.width) {
+        result.width = current_width;
+    }
+
+    return result;
 }
 
 // ------------------------------ public graphic font functions ------------------------------
@@ -129,8 +148,9 @@ static void _drawCharacter(Character *character, int pos_x, int pos_y, uint8_t b
 void MTGL_drawString(const char *str, int pos_x, int pos_y, const Font *font, float line_spacing) {
     int curr_pos_x = pos_x;
     int curr_pos_y = pos_y;
-    while (*str) {
+    while (*str != '\0') {
         if (*str == '\n') {
+            // new line
             curr_pos_y += font->font_size * line_spacing;
             curr_pos_x = pos_x;
             str++;

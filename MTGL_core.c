@@ -9,8 +9,7 @@
 extern "C" {
 #endif
 
-static uint32_t _screen_width = 0;
-static uint32_t _screen_height = 0;
+static MTGLSize _screen_size = {.width = 0, .height = 0};
 static uint8_t _screen_bpp = 0;
 static uint8_t *_screen_buffer = NULL;
 static void (*_flushBuffer)(void) = NULL;
@@ -20,12 +19,11 @@ static uint8_t _screen_pixels_per_byte;
 static uint8_t _screen_max_color;
 
 void MTGL_attatchHAL(MTGLInitStruct *init_struct) {
-    _screen_width = init_struct->screen_width;
-    _screen_height = init_struct->screen_height;
+    _screen_size = init_struct->screen_size;
     _screen_bpp = init_struct->screen_bpp;
     _flushBuffer = init_struct->flushBufferFunction;
     _screen_buffer = init_struct->screen_buffer;
-    _screen_buffer_size = _screen_height * _screen_width * _screen_bpp / 8;
+    _screen_buffer_size = _screen_size.height * _screen_size.width * _screen_bpp / 8;
 
     _screen_pixels_per_byte = 8 / _screen_bpp;
     _screen_max_color = (1 << _screen_bpp) - 1;
@@ -38,7 +36,7 @@ void MTGL_flushBuffer(void) {
 }
 
 void MTGL_drawPixel(int x, int y, uint8_t color) {
-    if (x < 0 || x >= _screen_width || y < 0 || y >= _screen_height) {
+    if (x < 0 || x >= _screen_size.width || y < 0 || y >= _screen_size.height) {
         return;
     }
 
@@ -49,7 +47,7 @@ void MTGL_drawPixel(int x, int y, uint8_t color) {
     const int shift = (1 - pix) * _screen_bpp;
     const int bits = color << shift;
     const int clear = ~(_screen_max_color << shift);
-    const int buffer_pos = y * _screen_width / 2 + col;
+    const int buffer_pos = y * _screen_size.width / 2 + col;
 
     _screen_buffer[buffer_pos] &= clear;
     _screen_buffer[buffer_pos] |= bits;

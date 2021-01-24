@@ -7,7 +7,12 @@ extern "C" {
 #endif
 
 typedef struct {
-    uint32_t screen_width, screen_height;
+    uint32_t width;
+    uint32_t height;
+} MTGLSize;
+
+typedef struct {
+    MTGLSize screen_size;
     uint8_t screen_bpp;
     uint8_t *screen_buffer;
     void (*flushBufferFunction)(void);
