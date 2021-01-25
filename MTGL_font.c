@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 #if FONT_COMPRESSION_METHOD == FONT_COMPRESSION_LZ77
-#include "lz77.h"
+#include "LZ77/lz77.h"
 #endif
 
 #ifdef __cplusplus
