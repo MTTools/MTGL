@@ -2,7 +2,7 @@
 #include "MTGL_core.h"
 
 #if IMAGE_COMPRESSION_METHOD == IMAGE_COMPRESSION_LZ77
-#include "lz77.h"
+#include "LZ77/lz77.h"
 #endif
 
 #ifdef __cplusplus

@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 #if FONT_COMPRESSION_METHOD == FONT_COMPRESSION_LZ77
-#include "lz77.h"
+#include "LZ77/lz77.h"
 #endif
 
 #ifdef __cplusplus
@@ -64,7 +64,7 @@ static Utf8UnicodeChar _charFromUtf8(const char *chr) {
 }
 
     // binary search
-static Character * _getCharacterFromArray(uint32_t unicode_char, Character **array, int count) {
+static Character * _getCharacterFromArray(uint32_t unicode_char, Character **array, uint16_t count) {
     uint32_t first = 0;
     uint32_t last = count - 1;
     uint32_t middle = (first + last) / 2;
