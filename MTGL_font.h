@@ -18,6 +18,29 @@
 extern "C" {
 #endif
 
+typedef enum {
+    // top
+    TEXT_ALIGNMENT_LEFT_TOP, // default
+    TEXT_ALIGNMENT_CENTER_TOP,
+    TEXT_ALIGNMENT_RIGHT_TOP,
+    TEXT_ALIGNMENT_JUSTIFY_TOP,
+    // middle
+    TEXT_ALIGNMENT_LEFT_MIDDLE,
+    TEXT_ALIGNMENT_CENTER_MIDDLE,
+    TEXT_ALIGNMENT_RIGHT_MIDDLE,
+    TEXT_ALIGNMENT_JUSTIFY_MIDDLE,
+    // bottom
+    TEXT_ALIGNMENT_LEFT_BOTTOM,
+    TEXT_ALIGNMENT_CENTER_BOTTOM,
+    TEXT_ALIGNMENT_RIGHT_BOTTOM,
+    TEXT_ALIGNMENT_JUSTIFY_BOTTOM,
+    // justified
+    TEXT_ALIGNMENT_LEFT_JUSTIFY,
+    TEXT_ALIGNMENT_CENTER_JUSTIFY,
+    TEXT_ALIGNMENT_RIGHT_JUSTIFY,
+    TEXT_ALIGNMENT_JUSTIFY_JUSTIFY,
+} TextAlignment;
+
 typedef struct {
 	uint16_t width;
 	uint16_t height;
@@ -35,7 +58,11 @@ typedef struct {
 	Character **character_table;
 } Font;
 
-void MTGL_drawString(const char *str, int pos_x, int pos_y, const Font *font, float line_spacing);
+void MTGL_drawString(const char *str, int pos_x, int pos_y, const Font *font,
+        float line_spacing);
+void MTGL_drawStringAligned(const char *str, int pos_x, int pos_y,
+        const Font *font, float line_spacing, MTGLSize area,
+        TextAlignment alignment);
 
 MTGLSize Font_getStringSize(const char *str, const Font *font, float line_spacing);
 

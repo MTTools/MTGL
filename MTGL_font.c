@@ -145,7 +145,8 @@ static void _drawCharacter(Character *character, int pos_x, int pos_y, uint8_t b
     MTGL_drawImageBPP(pos_x, pos_y + character->height_offset, character->bytes_per_line * 8 / bpp, character->height, image_data, bpp);
 }
 
-void MTGL_drawString(const char *str, int pos_x, int pos_y, const Font *font, float line_spacing) {
+void MTGL_drawString(const char *str, int pos_x, int pos_y, const Font *font,
+        float line_spacing) {
     int curr_pos_x = pos_x;
     int curr_pos_y = pos_y;
     while (*str != '\0') {
@@ -164,6 +165,121 @@ void MTGL_drawString(const char *str, int pos_x, int pos_y, const Font *font, fl
             }
             str += char_len;
         }
+    }
+}
+
+void MTGL_drawStringAligned(const char *str, int pos_x, int pos_y,
+        const Font *font, float line_spacing, MTGLSize area,
+        TextAlignment alignment) {
+
+    // get lines count
+    uint16_t lines_cnt = 1;
+    const char *ptr = str;
+    while (*ptr != '\0') {
+        if (*ptr == '\n') {
+            lines_cnt++;
+        }
+        ptr++;
+    }
+
+    // get text height, depending on vertical align
+    float line_height = font->font_size * line_spacing;
+    float default_text_height = lines_cnt * line_height;
+    int32_t start_pos_y = pos_y;
+
+    switch (alignment) {
+    case TEXT_ALIGNMENT_LEFT_JUSTIFY:
+    case TEXT_ALIGNMENT_CENTER_JUSTIFY:
+    case TEXT_ALIGNMENT_RIGHT_JUSTIFY:
+    case TEXT_ALIGNMENT_JUSTIFY_JUSTIFY: {
+        // keep default start pos y
+        // add extra spacing
+        if (lines_cnt > 1) {
+            line_height += (area.height - default_text_height) / (lines_cnt - 1);
+        }
+        break;
+    }
+    case TEXT_ALIGNMENT_LEFT_MIDDLE:
+    case TEXT_ALIGNMENT_CENTER_MIDDLE:
+    case TEXT_ALIGNMENT_RIGHT_MIDDLE:
+    case TEXT_ALIGNMENT_JUSTIFY_MIDDLE:
+        start_pos_y += (area.height - default_text_height) / 2;
+        // keep default line height
+        break;
+    case TEXT_ALIGNMENT_LEFT_BOTTOM:
+    case TEXT_ALIGNMENT_CENTER_BOTTOM:
+    case TEXT_ALIGNMENT_RIGHT_BOTTOM:
+    case TEXT_ALIGNMENT_JUSTIFY_BOTTOM:
+        start_pos_y += (area.height - default_text_height);
+        // keep default line height
+        break;
+    default:
+        // keep default line height
+        break;
+    }
+
+    const char space_char[] = " ";
+    uint8_t char_len;
+    Character *space_ch = Font_getCharUTF8(font, space_char, &char_len);
+    uint16_t default_space_char_width = space_ch->width;
+    uint16_t line_nr = 0;
+    while (*str != '\0') {
+        const char *curr_line = str;
+        // measure current line
+        uint32_t space_count = 0;
+        uint32_t line_width = 0;
+        while ((*curr_line != '\0') && (*curr_line != '\n')) {
+            Character *ch = Font_getCharUTF8(font, curr_line, &char_len);
+            if (*curr_line == ' ') {
+                space_count++;
+            }
+            if (NULL != ch) {
+                line_width += ch->width;
+            }
+            curr_line++;
+        }
+
+        // get space and text width
+        int start_pos_x = pos_x;
+
+        switch (alignment) {
+        case TEXT_ALIGNMENT_CENTER_TOP:
+        case TEXT_ALIGNMENT_CENTER_MIDDLE:
+        case TEXT_ALIGNMENT_CENTER_BOTTOM:
+        case TEXT_ALIGNMENT_CENTER_JUSTIFY:
+            start_pos_x += ((area.width - line_width) / 2);
+            break;
+        case TEXT_ALIGNMENT_JUSTIFY_TOP:
+        case TEXT_ALIGNMENT_JUSTIFY_MIDDLE:
+        case TEXT_ALIGNMENT_JUSTIFY_BOTTOM:
+        case TEXT_ALIGNMENT_JUSTIFY_JUSTIFY:
+            // split missing width to spaces by count
+            break;
+        case TEXT_ALIGNMENT_RIGHT_TOP:
+        case TEXT_ALIGNMENT_RIGHT_MIDDLE:
+        case TEXT_ALIGNMENT_RIGHT_BOTTOM:
+        case TEXT_ALIGNMENT_RIGHT_JUSTIFY:
+            start_pos_x += (area.width - line_width);
+            break;
+        default:
+            // alignment left
+            break;
+        }
+
+        // draw current line
+        int curr_pos_x = start_pos_x;
+        int curr_pos_y = start_pos_y + line_nr * line_height;
+        while ((*str != '\0') && (*str != '\n')) {
+            Character *ch = Font_getCharUTF8(font, str, &char_len);
+            if (ch != NULL) {
+                _drawCharacter(ch, curr_pos_x, curr_pos_y, font->bits_per_pixel);
+                curr_pos_x += ch->width;
+            }
+            str += char_len;
+        }
+
+        line_nr++;
+        str++;
     }
 }
 
