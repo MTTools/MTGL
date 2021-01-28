@@ -279,7 +279,6 @@ void MTGL_drawStringAligned(const char *str, int pos_x, int pos_y,
         }
 
         line_nr++;
-        str++;
     }
 }
 
