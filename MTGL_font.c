@@ -186,12 +186,10 @@ void MTGL_drawStringAligned(const char *str, int pos_x, int pos_y,
     float line_height = font->font_size * line_spacing;
     float default_text_height = lines_cnt * line_height;
     int32_t start_pos_y = pos_y;
-
-    switch (alignment) {
-    case TEXT_ALIGNMENT_LEFT_JUSTIFY:
-    case TEXT_ALIGNMENT_CENTER_JUSTIFY:
-    case TEXT_ALIGNMENT_RIGHT_JUSTIFY:
-    case TEXT_ALIGNMENT_JUSTIFY_JUSTIFY: {
+    TextAlignmentVertical alignment_v = alignment & 0xF; // 4 lsb
+    TextAlignmentHorizontal alignment_h = alignment >> 4; // 4 msb
+    switch (alignment_v) {
+    case TEXT_ALIGNMENT_VERTICAL_JUSTIFY: {
         // keep default start pos y
         // add extra spacing
         if (lines_cnt > 1) {
@@ -199,17 +197,11 @@ void MTGL_drawStringAligned(const char *str, int pos_x, int pos_y,
         }
         break;
     }
-    case TEXT_ALIGNMENT_LEFT_MIDDLE:
-    case TEXT_ALIGNMENT_CENTER_MIDDLE:
-    case TEXT_ALIGNMENT_RIGHT_MIDDLE:
-    case TEXT_ALIGNMENT_JUSTIFY_MIDDLE:
+    case TEXT_ALIGNMENT_VERTICAL_MIDDLE:
         start_pos_y += (area.height - default_text_height) / 2;
         // keep default line height
         break;
-    case TEXT_ALIGNMENT_LEFT_BOTTOM:
-    case TEXT_ALIGNMENT_CENTER_BOTTOM:
-    case TEXT_ALIGNMENT_RIGHT_BOTTOM:
-    case TEXT_ALIGNMENT_JUSTIFY_BOTTOM:
+    case TEXT_ALIGNMENT_VERTICAL_BOTTOM:
         start_pos_y += (area.height - default_text_height);
         // keep default line height
         break;
@@ -242,23 +234,14 @@ void MTGL_drawStringAligned(const char *str, int pos_x, int pos_y,
         // get space and text width
         int start_pos_x = pos_x;
 
-        switch (alignment) {
-        case TEXT_ALIGNMENT_CENTER_TOP:
-        case TEXT_ALIGNMENT_CENTER_MIDDLE:
-        case TEXT_ALIGNMENT_CENTER_BOTTOM:
-        case TEXT_ALIGNMENT_CENTER_JUSTIFY:
+        switch (alignment_h) {
+        case TEXT_ALIGNMENT_HORIZONTAL_CENTER:
             start_pos_x += ((area.width - line_width) / 2);
             break;
-        case TEXT_ALIGNMENT_JUSTIFY_TOP:
-        case TEXT_ALIGNMENT_JUSTIFY_MIDDLE:
-        case TEXT_ALIGNMENT_JUSTIFY_BOTTOM:
-        case TEXT_ALIGNMENT_JUSTIFY_JUSTIFY:
+        case TEXT_ALIGNMENT_HORIZONTAL_JUSTIFY:
             // split missing width to spaces by count
             break;
-        case TEXT_ALIGNMENT_RIGHT_TOP:
-        case TEXT_ALIGNMENT_RIGHT_MIDDLE:
-        case TEXT_ALIGNMENT_RIGHT_BOTTOM:
-        case TEXT_ALIGNMENT_RIGHT_JUSTIFY:
+        case TEXT_ALIGNMENT_HORIZONTAL_RIGHT:
             start_pos_x += (area.width - line_width);
             break;
         default:
