@@ -24,6 +24,7 @@ void MTGL_flushBuffer(void);
 void MTGL_drawPixel(int x, int y, uint8_t color);
 
 void MTGL_fill(uint8_t color);
+void MTGL_drawLine(int x1, int y1, int x2, int y2, uint8_t color);
 
 #ifdef __cplusplus
 }
