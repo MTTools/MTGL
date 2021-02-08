@@ -186,8 +186,8 @@ void MTGL_drawStringAligned(const char *str, int pos_x, int pos_y,
     float line_height = font->font_size * line_spacing;
     float default_text_height = lines_cnt * line_height;
     int32_t start_pos_y = pos_y;
-    TextAlignmentVertical alignment_v = alignment & 0xF; // 4 lsb
-    TextAlignmentHorizontal alignment_h = alignment >> 4; // 4 msb
+    TextAlignmentVertical alignment_h = alignment & 0b11; // 2 lsb
+    TextAlignmentHorizontal alignment_v = alignment >> 2; // 2 msb
     switch (alignment_v) {
     case TEXT_ALIGNMENT_VERTICAL_JUSTIFY: {
         // keep default start pos y
