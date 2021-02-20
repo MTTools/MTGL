@@ -18,7 +18,7 @@ static uint32_t _screen_buffer_size = 0;
 static uint8_t _screen_pixels_per_byte;
 static uint8_t _screen_max_color;
 
-void MTGL_attatchHAL(MTGLInitStruct *init_struct) {
+void MTGL_attachHAL(MTGLInitStruct *init_struct) {
     _screen_size = init_struct->screen_size;
     _screen_bpp = init_struct->screen_bpp;
     _flushBuffer = init_struct->flushBufferFunction;

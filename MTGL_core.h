@@ -18,7 +18,7 @@ typedef struct {
     void (*flushBufferFunction)(void);
 } MTGLInitStruct;
 
-void MTGL_attatchHAL(MTGLInitStruct *init_struct);
+void MTGL_attachHAL(MTGLInitStruct *init_struct);
 
 void MTGL_flushBuffer(void);
 void MTGL_drawPixel(int x, int y, uint8_t color);
