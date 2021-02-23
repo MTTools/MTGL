@@ -16,6 +16,7 @@ extern "C" {
 static uint8_t decompression_buffer[FONT_DECOMPRESSION_BUFFER_SIZE];
 #endif
 
+extern void MTGL_drawImageBPPBrightness(int pos_x, int pos_y, int width, int height, const uint8_t *image_data, uint8_t bpp, uint8_t brightness);
 extern void MTGL_drawImageBPP(int pos_x, int pos_y, int width, int height, const uint8_t *image_data, uint8_t bpp);
 
 // ------------------------------ basic private font functions ------------------------------
@@ -128,7 +129,7 @@ MTGLSize Font_getStringSize(const char *str, const Font *font, float line_spacin
 
 // ------------------------------ public graphic font functions ------------------------------
 
-static void _drawCharacter(Character *character, int pos_x, int pos_y, uint8_t bpp) {
+static void _drawCharacter(Character *character, int pos_x, int pos_y, uint8_t bpp, uint8_t brightness) {
     uint8_t *image_data = character->data;
 
 #if FONT_COMPRESSION_METHOD == FONT_COMPRESSION_NONE
@@ -142,36 +143,11 @@ static void _drawCharacter(Character *character, int pos_x, int pos_y, uint8_t b
     image_data = decompression_buffer;
 #endif
 
-    MTGL_drawImageBPP(pos_x, pos_y + character->height_offset, character->bytes_per_line * 8 / bpp, character->height, image_data, bpp);
+    MTGL_drawImageBPPBrightness(pos_x, pos_y + character->height_offset,
+            character->bytes_per_line * 8 / bpp, character->height, image_data, bpp, brightness);
 }
 
-void MTGL_drawString(const char *str, int pos_x, int pos_y, const Font *font,
-        float line_spacing) {
-    int curr_pos_x = pos_x;
-    int curr_pos_y = pos_y;
-    while (*str != '\0') {
-        if (*str == '\n') {
-            // new line
-            curr_pos_y += font->font_size * line_spacing;
-            curr_pos_x = pos_x;
-            str++;
-        }
-        else {
-            unsigned char char_len;
-            Character *ch = Font_getCharUTF8(font, str, &char_len);
-            if (ch != NULL) {
-                _drawCharacter(ch, curr_pos_x, curr_pos_y, font->bits_per_pixel);
-                curr_pos_x += ch->width;
-            }
-            str += char_len;
-        }
-    }
-}
-
-void MTGL_drawStringAligned(const char *str, int pos_x, int pos_y,
-        const Font *font, float line_spacing, MTGLSize area,
-        TextAlignment alignment) {
-
+void MTGL_drawString(const char *str, int pos_x, int pos_y, StringFormat *format) {
     // get lines count
     uint16_t lines_cnt = 1;
     const char *ptr = str;
@@ -183,26 +159,26 @@ void MTGL_drawStringAligned(const char *str, int pos_x, int pos_y,
     }
 
     // get text height, depending on vertical align
-    float line_height = font->font_size * line_spacing;
+    float line_height = format->font->font_size * format->line_spacing;
     float default_text_height = lines_cnt * line_height;
     int32_t start_pos_y = pos_y;
-    TextAlignmentVertical alignment_h = alignment & 0b11; // 2 lsb
-    TextAlignmentHorizontal alignment_v = alignment >> 2; // 2 msb
+    TextAlignmentVertical alignment_h = format->alignment & 0b11; // 2 lsb
+    TextAlignmentHorizontal alignment_v = format->alignment >> 2; // 2 msb
     switch (alignment_v) {
     case TEXT_ALIGNMENT_VERTICAL_JUSTIFY: {
         // keep default start pos y
         // add extra spacing
-        if (lines_cnt > 1 && default_text_height < area.height) {
-            line_height += (area.height - default_text_height) / (lines_cnt - 1);
+        if (lines_cnt > 1 && default_text_height < format->area.height) {
+            line_height += (format->area.height - default_text_height) / (lines_cnt - 1);
         }
         break;
     }
     case TEXT_ALIGNMENT_VERTICAL_MIDDLE:
-        start_pos_y += (area.height - default_text_height) / 2;
+        start_pos_y += (format->area.height - default_text_height) / 2;
         // keep default line height
         break;
     case TEXT_ALIGNMENT_VERTICAL_BOTTOM:
-        start_pos_y += (area.height - default_text_height);
+        start_pos_y += (format->area.height - default_text_height);
         // keep default line height
         break;
     default:
@@ -212,8 +188,8 @@ void MTGL_drawStringAligned(const char *str, int pos_x, int pos_y,
 
     const char space_char[] = " ";
     uint8_t char_len;
-    uint16_t default_space_char_width = font->font_size / 2;
-    Character *space_ch = Font_getCharUTF8(font, space_char, &char_len);
+    uint16_t default_space_char_width = format->font->font_size / 2;
+    Character *space_ch = Font_getCharUTF8(format->font, space_char, &char_len);
     if (space_ch != NULL) {
         default_space_char_width = space_ch->width;
     }
@@ -225,7 +201,7 @@ void MTGL_drawStringAligned(const char *str, int pos_x, int pos_y,
         uint32_t space_count = 0;
         uint32_t line_width = 0;
         while ((*curr_line != '\0') && (*curr_line != '\n')) {
-            Character *ch = Font_getCharUTF8(font, curr_line, &char_len);
+            Character *ch = Font_getCharUTF8(format->font, curr_line, &char_len);
             if (*curr_line == ' ') {
                 space_count++;
             }
@@ -240,16 +216,16 @@ void MTGL_drawStringAligned(const char *str, int pos_x, int pos_y,
         uint16_t extra_space_width = 0;
         switch (alignment_h) {
         case TEXT_ALIGNMENT_HORIZONTAL_CENTER:
-            start_pos_x += ((area.width - line_width) / 2);
+            start_pos_x += ((format->area.width - line_width) / 2);
             break;
         case TEXT_ALIGNMENT_HORIZONTAL_JUSTIFY:
-            if (line_width < area.width && space_count > 0) {
+            if (line_width < format->area.width && space_count > 0) {
                 // split missing width to spaces by count
-                extra_space_width = (area.width - line_width) / space_count;
+                extra_space_width = (format->area.width - line_width) / space_count;
             }
             break;
         case TEXT_ALIGNMENT_HORIZONTAL_RIGHT:
-            start_pos_x += (area.width - line_width);
+            start_pos_x += (format->area.width - line_width);
             break;
         default:
             // alignment left
@@ -260,9 +236,9 @@ void MTGL_drawStringAligned(const char *str, int pos_x, int pos_y,
         int curr_pos_x = start_pos_x;
         int curr_pos_y = start_pos_y + line_nr * line_height;
         while ((*str != '\0') && (*str != '\n')) {
-            Character *ch = Font_getCharUTF8(font, str, &char_len);
+            Character *ch = Font_getCharUTF8(format->font, str, &char_len);
             if (ch != NULL) {
-                _drawCharacter(ch, curr_pos_x, curr_pos_y, font->bits_per_pixel);
+                _drawCharacter(ch, curr_pos_x, curr_pos_y, format->font->bits_per_pixel, format->brightness);
                 curr_pos_x += ch->width;
             }
             if (*str == ' ') {

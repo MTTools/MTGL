@@ -25,7 +25,7 @@ static uint8_t _getPixelColor(uint8_t input, int bit_nr, uint8_t bpp) {
     return input * 255 / ((1 << bpp) - 1);
 }
 
-void MTGL_drawImageBPP(int pos_x, int pos_y, int width, int height, const uint8_t *image_data, uint8_t bpp) {
+void MTGL_drawImageBPPBrightness(int pos_x, int pos_y, int width, int height, const uint8_t *image_data, uint8_t bpp, uint8_t brightness) {
     const uint8_t PixelsPerByte = 8 / bpp;
     const int DataCols = width / PixelsPerByte + ((width % PixelsPerByte) ? 1 : 0);
 
@@ -36,6 +36,7 @@ void MTGL_drawImageBPP(int pos_x, int pos_y, int width, int height, const uint8_
                 int x = col * PixelsPerByte + (bit / bpp);
                 if (x < width) {
                     uint8_t color = _getPixelColor(byte, bit, bpp);
+                    color = color * brightness / UINT8_MAX;
                     if (color) {
                         MTGL_drawPixel(pos_x + x, pos_y + y, color);
                     }
@@ -45,11 +46,19 @@ void MTGL_drawImageBPP(int pos_x, int pos_y, int width, int height, const uint8_
     }
 }
 
+void MTGL_drawImageBPP(int pos_x, int pos_y, int width, int height, const uint8_t *image_data, uint8_t bpp) {
+    MTGL_drawImageBPPBrightness(pos_x, pos_y, width, height, image_data, bpp, UINT8_MAX);
+}
+
 void MTGL_drawImage(int pos_x, int pos_y, const Image *image) {
-	uint8_t *image_data = image->image_data;
+    MTGL_drawImageBrightness(pos_x, pos_y, image, INT8_MAX);
+}
+
+void MTGL_drawImageBrightness(int pos_x, int pos_y, const Image *image, int8_t brightness) {
+    uint8_t *image_data = image->image_data;
 
 #if IMAGE_COMPRESSION_METHOD == IMAGE_COMPRESSION_NONE
-	// uncompressed
+    // uncompressed
 #elif IMAGE_COMPRESSION_METHOD == IMAGE_COMPRESSION_LZ77
     uint32_t size = lz77_decompress(image_data, image->image_data_length, decompression_buffer, sizeof(decompression_buffer));
     if (size > sizeof(decompression_buffer)) {
@@ -59,7 +68,7 @@ void MTGL_drawImage(int pos_x, int pos_y, const Image *image) {
     image_data = decompression_buffer;
 #endif
 
-    MTGL_drawImageBPP(pos_x, pos_y, image->width, image->height, image_data, image->bits_per_pixel);
+    MTGL_drawImageBPPBrightness(pos_x, pos_y, image->width, image->height, image_data, image->bits_per_pixel, brightness);
 }
 
 #ifdef __cplusplus

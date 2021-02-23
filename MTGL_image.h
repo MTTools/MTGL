@@ -24,6 +24,7 @@ typedef struct {
 } Image;
 
 void MTGL_drawImage(int pos_x, int pos_y, const Image *image);
+void MTGL_drawImageBrightness(int pos_x, int pos_y, const Image *image, int8_t brightness);
 
 #ifdef __cplusplus
 }

@@ -68,12 +68,15 @@ typedef struct {
 	Character **character_table;
 } Font;
 
-void MTGL_drawString(const char *str, int pos_x, int pos_y, const Font *font,
-        float line_spacing);
+typedef struct {
+    const Font *font;
+    float line_spacing;
+    uint8_t brightness;
+    MTGLSize area;
+    TextAlignment alignment;
+} StringFormat;
 
-void MTGL_drawStringAligned(const char *str, int pos_x, int pos_y,
-        const Font *font, float line_spacing, MTGLSize area,
-        TextAlignment alignment);
+void MTGL_drawString(const char *str, int pos_x, int pos_y, StringFormat *format);
 
 MTGLSize Font_getStringSize(const char *str, const Font *font, float line_spacing);
 
