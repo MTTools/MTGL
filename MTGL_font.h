@@ -9,10 +9,14 @@
 #define FONT_COMPRESSION_LZ77      1 // LZ77~ compression
 
 // used compression method
+#ifndef FONT_COMPRESSION_METHOD
 #define FONT_COMPRESSION_METHOD    FONT_COMPRESSION_LZ77
+#endif
 
 // font character decompression buffer size
+#ifndef FONT_DECOMPRESSION_BUFFER_SIZE
 #define FONT_DECOMPRESSION_BUFFER_SIZE   (40 * 40)
+#endif
 
 #ifdef __cplusplus
 extern "C" {
