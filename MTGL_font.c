@@ -208,7 +208,7 @@ void MTGL_drawString(const char *str, int pos_x, int pos_y, StringFormat *format
             if (NULL != ch) {
                 line_width += ch->width;
             }
-            curr_line++;
+            curr_line += char_len;
         }
 
         // get space and text width
